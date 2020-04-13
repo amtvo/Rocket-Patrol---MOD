@@ -4,7 +4,7 @@ class play extends Phaser.Scene{
     }
 
     preload(){
-        //load images/tile sprite
+        //load images
         this.load.image('rocket', './assets/rocket.png');
         this.load.image('spaceship', './assets/spaceship.png');
         this.load.image('starfield', './assets/starfield.png');
@@ -13,13 +13,13 @@ class play extends Phaser.Scene{
     }
 
     create() {
-        //place tile sprit
+        //place tile sprite
         this.starfield = this.add.tileSprite(0,0, 640, 480, 'starfield').
         setOrigin(0, 0);
         
         //make white borders
         this.add.rectangle(5, 5, 630, 32, 0xFFFFFF).setOrigin(0.0);
-            //0x is the hex value
+            //0x hex 
         this.add.rectangle(5, 443, 630, 32, 0xFFFFFF).setOrigin(0.0);
         this.add.rectangle(5, 5, 32, 455, 0xFFFFFF).setOrigin(0.0);
         this.add.rectangle(603, 5, 32, 455, 0xFFFFFF).setOrigin(0.0);
@@ -28,7 +28,6 @@ class play extends Phaser.Scene{
         this.add.rectangle(37, 42, 566, 64, 0x00FF00).setOrigin(0.0);
 
         //add rocket (p1)
-        //constructor(scene, x, y, texture, fame)
         this.p1Rocket = new Rocket(this, game.config.width/2, 431, 'rocket').
         setScale(0.5, 0.5).setOrigin(0, 0);
 
@@ -70,6 +69,7 @@ class play extends Phaser.Scene{
 
         this.gameOver = false;
 
+        //game over
         scoreConfig.fixedWidth = 0;
         this.clock = this.time.delayedCall(game.settings.gameTimer, () => {
             this.add.text(game.config.width/2, game.config.height/2, 'GAME OVER', scoreConfig).setOrigin(0.5);
@@ -80,11 +80,12 @@ class play extends Phaser.Scene{
     }
 
     update(){
-
+        //press f -> restarts game
         if(this.gameOver && Phaser.Input.Keyboard.JustDown(keyF)) {
             this.scene.restart(this.p1Score);
         }
 
+        //press left -> goes to menu screen
         if(this.gameOver && Phaser.Input.Keyboard.JustDown(keyLEFT)) {
             this.scene.start("menuScene");
         }

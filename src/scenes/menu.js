@@ -36,9 +36,6 @@ class menu extends Phaser.Scene{
         menuConfig.color = '#000';
         this.add.text(centerX, centerY + textSpacer, 'Press <- for Easy or -> for Hard', menuConfig).setOrigin(0.5);
 
-        //this.scene.start("playScene");
-        //launch next scene --> display menu text
-
         //keys --> borrowed form play.js
         keyLEFT = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT);
         keyRIGHT = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT);
