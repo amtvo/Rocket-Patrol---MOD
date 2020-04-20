@@ -6,15 +6,21 @@ class play extends Phaser.Scene{
     preload(){
         //load images
         this.load.image('rocket', './assets/rocket.png');
-        this.load.image('spaceship', './assets/spaceship.png');
-        this.load.image('starfield', './assets/starfield.png');
-        this.load.spritesheet('explosion', './assets/explosion.png', {frameWidth: 64, frameHeight: 32,
+        this.load.image('ship1', './assets/ship1.png');
+        this.load.image('ship2', './assets/ship2.png');
+        this.load.image('ship3', './assets/ship3.png');
+        this.load.image('newStars', './assets/newStars.png');
+        this.load.spritesheet('explosion', './assets/explosionAni-Sheet.png', {frameWidth: 64, frameHeight: 32,
         startFrame: 0, endFrame: 9});
     }
 
     create() {
+
+        //for restarting timer when player restarts instead of going to the menu
+        game.settings.gameTimer = gameTimeSettings;
+
         //place tile sprite
-        this.starfield = this.add.tileSprite(0,0, 640, 480, 'starfield').
+        this.newStars = this.add.tileSprite(0,0, 640, 480, 'newStars').
         setOrigin(0, 0);
         
         //make white borders
@@ -25,18 +31,18 @@ class play extends Phaser.Scene{
         this.add.rectangle(603, 5, 32, 455, 0xFFFFFF).setOrigin(0.0);
 
         //green ui background 
-        this.add.rectangle(37, 42, 566, 64, 0x00FF00).setOrigin(0.0);
+        this.add.rectangle(37, 42, 566, 64, 0x85ff93).setOrigin(0.0);
 
         //add rocket (p1)
         this.p1Rocket = new Rocket(this, game.config.width/2, 431, 'rocket').
         setScale(0.5, 0.5).setOrigin(0, 0);
 
         //add scapceship
-        this.ship01 = new Spaceship(this, game.config.width + 192, 132, 'spaceship', 0, 30).
+        this.ship01 = new Spaceship(this, game.config.width + 192, 132, 'ship1', 0, 30).
         setOrigin(0, 0);
-        this.ship02 = new Spaceship(this, game.config.width + 96, 196, 'spaceship', 0, 20).
+        this.ship02 = new Spaceship(this, game.config.width + 96, 196, 'ship2', 0, 20).
         setOrigin(0, 0);
-        this.ship03 = new Spaceship(this, game.config.width, 260, 'spaceship', 0, 10).
+        this.ship03 = new Spaceship(this, game.config.width, 260, 'ship3', 0, 10).
         setOrigin(0, 0);
 
         //define keyboard keys
@@ -52,30 +58,40 @@ class play extends Phaser.Scene{
 
         //score
         this.p1Score = 0;
+
         //display score
-        let scoreConfig = {
+        this.scoreLeft = this.add.text(69, 54, this.p1Score, scoreConfig);
+
+        this.gameOver = false;
+
+        //MOD - remaining time
+        this.countdown = this.time.addEvent({ //TimerEventConfig --> Phaser Lib
+            delay: 1000, 
+            repeat: game.settings.gameTimer, //repeat every second depending on game settings
+            callback: counting, //call function
+            callbackScope: this
+        });
+
+        let countdownConfig = {
             fontFamily: 'Courier',
             fontSize: '28px',
-            backgroundColor: '#F3B141',
+            backgroundColor: '#ffda82',
             color: '#843605',
-            aligh: 'right',
+            align: 'right',
             padding: {
                 top: 5,
                 bottom: 5,
             },
             fixedWidth: 100
         }
-        //game over
-        scoreConfig.fixedWidth = 0;
-        this.clock = this.time.delayedCall(game.settings.gameTimer, () => {
-            this.add.text(game.config.width/2, game.config.height/2, 'GAME OVER', scoreConfig).setOrigin(0.5);
-            this.add.text(game.config.width/2, game.config.height/2 + 64, '(F)ire to Restart or <- for Menu', scoreConfig).
-            setOrigin(0.5);
-            this.gameOver = true;
-        }, null, this);
+
+        //MOD - display time
+        countdownTimer = this.add.text(471, 54, game.settings.gameTimer/1000, countdownConfig);
+
     }
 
     update(){
+
         //press f -> restarts game
         if(this.gameOver && Phaser.Input.Keyboard.JustDown(keyF)) {
             this.scene.restart(this.p1Score);
@@ -86,8 +102,8 @@ class play extends Phaser.Scene{
             this.scene.start("menuScene");
         }
 
-        //scroll starfield
-        this.starfield.tilePositionX -= 4;
+        //scroll newStars
+        this.newStars.tilePositionX -= 4;
             //moving backwards (-=) by 4 pixels
 
         if(!this.gameOver) {
@@ -97,20 +113,38 @@ class play extends Phaser.Scene{
             this.ship01.update();
             this.ship02.update();
             this.ship03.update();
-    }
-
+        }
+        //furthest ship, time +8 seconds
        if(this.checkCollision(this.p1Rocket, this.ship03)) {
             this.p1Rocket.reset();
             this.shipExplode(this.ship03);
+            game.settings.gameTimer += 2000;
         }
+        //middle ship, time +5 seconds
         if(this.checkCollision(this.p1Rocket, this.ship02)) {
             this.p1Rocket.reset();
             this.shipExplode(this.ship02);
+            game.settings.gameTimer += 3000;
         }
+        //closest ship, time +3 seconds
         if(this.checkCollision(this.p1Rocket, this.ship01)) {
             this.p1Rocket.reset();
             this.shipExplode(this.ship01);
+            game.settings.gameTimer += 5000;
         }
+
+        if(game.settings.gameTimer <= 0){
+            //game over
+            scoreConfig.fixedWidth = 0;
+            countdownTimer.setText(0);
+            //this.clock = this.time.delayedCall(game.settings.gameTimer, () => {
+                //allows to be able to reset time, not static
+                this.add.text(game.config.width/2, game.config.height/2, 'GAME OVER', scoreConfig).setOrigin(0.5);
+                this.add.text(game.config.width/2, game.config.height/2 + 64, '(F)ire to Restart or <- for Menu', scoreConfig).
+                setOrigin(0.5);
+                this.gameOver = true;
+        }
+
     }
 
     checkCollision(rocket, ship) {
@@ -139,4 +173,12 @@ class play extends Phaser.Scene{
 
         this.sound.play('sfx_explosion');
     }
+
+}
+
+function counting() {
+    // -1 second, counting down
+    game.settings.gameTimer -= 1000;
+    //setting the text
+    countdownTimer.setText(game.settings.gameTimer/1000);
 }
