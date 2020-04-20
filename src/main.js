@@ -1,3 +1,13 @@
+//Amber Vo
+
+//create new scrolling sprite for background (10)
+//display time remaining in seconds on screen (15)
+//create new artwork for all in game assets (rocket, spaceship, explosion) (25)
+//implement new timing/scoring mechanism that adds time to clock for successful hits (25)
+//create new title screen (15)
+//background music (10)
+//total 100
+
 let config = {
 
     type: Phaser.CANVAS,
