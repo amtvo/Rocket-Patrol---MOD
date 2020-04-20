@@ -65,10 +65,6 @@ class play extends Phaser.Scene{
             },
             fixedWidth: 100
         }
-        this.scoreLeft = this.add.text(69, 54, this.p1Score, scoreConfig);
-
-        this.gameOver = false;
-
         //game over
         scoreConfig.fixedWidth = 0;
         this.clock = this.time.delayedCall(game.settings.gameTimer, () => {
